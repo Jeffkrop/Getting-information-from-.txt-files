@@ -42,7 +42,8 @@ def read_file(file):
                 
                 
     #Assigns each word in the txt document to a list, converts to
-    #lower case, splits and appends each word.    
+    #lower case, splits and appends each word. It then prints the number
+    #of words the in the inputed text file.
     count = 0
     with open(file_name) as f:
         word_list = []
@@ -71,24 +72,6 @@ def read_file(file):
     geopy(the_word)
     clean_list(word_list)    
 
-    
-
-    
-    
-def geopy(the_word): 
-    
-    """ This function returns the address with 
-    city, zip code, state, county and country.
-    It also provides latitude and longitude of 
-    the user inputted word from above."""
-    
-    geolocator = Nominatim()
-    location = geolocator.geocode(the_word)
-    Address = location.address
-    lat_long = (location.latitude,location.longitude)
-    print Address
-    print lat_long
-    print""
  
 
 def clean_list(word_list):
@@ -125,7 +108,23 @@ def create_dict(clean_word_list):
     for key, value in sorted(word_count.items(), key= operator.itemgetter(1)):
         print key, value
     
-
+def geopy(the_word): 
+    
+    """ This function returns the address with 
+    city, zip code, state, county and country.
+    It also provides latitude and longitude of 
+    the user inputted word from above."""
+   
+    geolocator = Nominatim()
+    location = geolocator.geocode(the_word)
+    if location != None:
+        Address = location.address
+        lat_long = (location.latitude,location.longitude)        
+        print Address        
+        print lat_long
+        print""
+    else:
+        print "There is no geographic information to return for the word in input. \n"
 
 
 
