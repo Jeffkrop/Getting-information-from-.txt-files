@@ -43,6 +43,7 @@ def read_file(file):
                 
     #Assigns each word in the txt document to a list, converts to
     #lower case, splits and appends each word.    
+    count = 0
     with open(file_name) as f:
         word_list = []
         for words in f:
@@ -50,6 +51,10 @@ def read_file(file):
             word_f = content.lower().split()
             for each_word in word_f:
                 word_list.append(each_word)
+                if word_list != -1 and word_list != 0:
+                    count += 1
+    print "The text file you entered has", count, "words"
+                    
      
                       
     #Count and prints the number of times user given word occurs.
