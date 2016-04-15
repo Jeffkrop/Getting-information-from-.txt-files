@@ -14,10 +14,12 @@
 
 
 import csv
-from geopy.geocoders import Nominatim
+from geopy.geocoders import GoogleV3
 import operator 
+import ogr, os
+import osgeo.osr as osr   
 
-    
+
 def read_file(file):
     '''
         This is a function that asks the user to input a file path, 
@@ -109,33 +111,74 @@ def create_dict(clean_word_list):
         print key, value
     
 def geopy(the_word): 
-    
-    """ This function returns the address with 
-    city, zip code, state, county and country.
-    It also provides latitude and longitude of 
-    the user inputted word from above."""
-   
-    geolocator = Nominatim()
-    location = geolocator.geocode(the_word)
+
+    geolocator =  GoogleV3()
+    mycsv = open(r"/Users/jeffkropelnicki/Desktop/addresses.csv", "a")
+    location = geolocator.geocode(the_word, exactly_one=True) 
     if location != None:
         Address = location.address
-        lat_long = (location.latitude,location.longitude)        
-        print Address        
-        print lat_long
+        lat_long = location.latitude, location.longitude
+        latitude = str(location.latitude)
+        longitude = str(location.longitude)  
+        print Address, latitude, longitude
         print""
-    else:
-        print "There is no geographic information to return for the word in input. \n"
+
+        list_lat = []
+        for i in range(1):
+            list_lat.append(lat_long)
+        for line in list_lat:
+            print(line)   
+            
+        mycsv.writelines(("\n" + "%s" + ",") %(Address))
+        mycsv.writelines(("%s"+",") %(latitude))
+        mycsv.writelines(("%s"+"\n") %(longitude))
+    
+        mycsv.close()    
+
+    shapefile(line)
+
+def shapefile(line):
+    
+    
+    # Input data
+    pointCoord = line
+    fieldName = 'Lat'
+    fieldType = ogr.OFTString
+    fieldValue = 'test'
+    outSHPfn = "/Users/jeffkropelnicki/Desktop/Test_shapefile/address.shp"
+
+    # create the spatial reference, WGS84
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(4326)
 
 
+    # Create the output shapefile
+    shpDriver = ogr.GetDriverByName("ESRI Shapefile")
+    
+    if os.path.exists(outSHPfn):
+        shpDriver.DeleteDataSource(outSHPfn)
+    outDataSource = shpDriver.CreateDataSource(outSHPfn)
+    outLayer = outDataSource.CreateLayer(outSHPfn, srs, geom_type = ogr.wkbPoint )
 
+    #create point geometry
+    point = ogr.Geometry(ogr.wkbPoint)
+    point.AddPoint(pointCoord[0],pointCoord[1])
+
+    # create a field
+    idField = ogr.FieldDefn(fieldName, fieldType)
+    outLayer.CreateField(idField)
+
+    # Create the feature and set values
+    featureDefn = outLayer.GetLayerDefn()
+    outFeature = ogr.Feature(featureDefn)
+    outFeature.SetGeometry(point)
+    outFeature.SetField(fieldName, fieldValue)
+    outLayer.CreateFeature(outFeature)    
+    
 
 read_file(file)    
     
     
-    #with open(r"/Users/jeffkropelnicki/Desktop/test.csv", 'w') as fp:
-        #a = csv.writer(fp)
-        #data = location
-        #a.writerow(data)  
 
 
 
